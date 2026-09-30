@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #f3eee4;
+  --paper-2: #e7dfd0;
+  --ink: #1c1915;
+  --muted: #5c534a;
+  --line: #d5cbbd;
+  --olive: #24382e;
+  --olive-2: #3c5a49;
+  --clay: #8a4632;
+  --card: #fbf7f0;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-olive: var(--olive);
+  --color-olive-2: var(--olive-2);
+  --color-clay: var(--clay);
+  --color-card: var(--card);
+  --font-sans: var(--font-heebo), sans-serif;
+  --font-serif: var(--font-frank), serif;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-heebo), sans-serif;
+}
+
+::selection {
+  background: #e4d3c4;
+}
+
+textarea {
+  min-height: 7rem;
+}
