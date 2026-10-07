@@ -19,6 +19,13 @@ export const he = {
     tasks: "משימות",
     agents: "סוכנים",
     audit: "יומן אירועים",
+    board: "לוח",
+  },
+  board: {
+    loading: "הלוח נטען…",
+    reading: "קורא טקסט מהתמונה…",
+    failed: "לא הצלחתי לקרוא טקסט מהתמונה.",
+    empty: "לא נמצא טקסט בתמונה.",
   },
   public: {
     eyebrow: "מיזם בהקמה",
@@ -218,6 +225,13 @@ export const en: typeof he = {
     tasks: "Tasks",
     agents: "Agents",
     audit: "Event log",
+    board: "Board",
+  },
+  board: {
+    loading: "Loading the board…",
+    reading: "Reading text from the image…",
+    failed: "Could not read text from the image.",
+    empty: "No text was found in the image.",
   },
   public: {
     eyebrow: "In planning",

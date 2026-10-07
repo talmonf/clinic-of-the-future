@@ -16,12 +16,13 @@ const links = [
   ["/admin/tasks", t.nav.tasks],
   ["/admin/agents", t.nav.agents],
   ["/admin/audit", t.nav.audit],
+  ["/admin/board", t.nav.board],
 ] as const;
 
 export function AdminNav({ email }: { email: string }) {
   const pathname = usePathname();
   return (
-    <aside className="flex w-full shrink-0 flex-col border-b border-line bg-card px-4 py-5 md:min-h-screen md:w-56 md:border-b-0 md:border-s">
+    <aside className="flex w-full shrink-0 flex-col border-b border-line bg-card px-4 py-5 md:h-dvh md:w-56 md:overflow-auto md:border-b-0 md:border-s">
       <Link href="/" className="font-serif text-lg leading-6 text-ink">
         {t.meta.title}
       </Link>
