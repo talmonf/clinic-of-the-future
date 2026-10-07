@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Frank_Ruhl_Libre, Heebo } from "next/font/google";
+import { KeepRtl } from "@/components/keep-rtl";
 import { t } from "@/lib/i18n";
 import "./globals.css";
 
@@ -22,7 +23,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="he" dir="rtl" className={`${heebo.variable} ${frank.variable} h-full`}>
-      <body className="min-h-full bg-paper font-sans text-ink antialiased">{children}</body>
+      <body className="min-h-full bg-paper font-sans text-ink antialiased">
+        <KeepRtl />
+        {children}
+      </body>
     </html>
   );
 }
