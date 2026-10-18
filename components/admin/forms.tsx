@@ -1,7 +1,7 @@
 import { saveAssumption, saveDecision, saveRisk } from "@/lib/actions/logs";
 import { saveAppointment } from "@/lib/actions/appointments";
 import { saveContact } from "@/lib/actions/contacts";
-import { saveMeeting } from "@/lib/actions/meetings";
+import { saveMeeting, importTranscript } from "@/lib/actions/meetings";
 import { saveTask } from "@/lib/actions/tasks";
 import { saveAgent } from "@/lib/actions/agents";
 import { toJerusalemInput } from "@/lib/format";
@@ -197,6 +197,7 @@ export function MeetingForm({
     clarifications: string;
     gaps: string;
     summary: string;
+    transcript: string;
   };
   docs: DocOption[];
 }) {
@@ -230,7 +231,23 @@ export function MeetingForm({
       <Field label={t.admin.summary}>
         <textarea name="summary" defaultValue={row?.summary ?? ""} className={inputClass} />
       </Field>
+      <Field label={t.admin.transcript}>
+        <textarea name="transcript" defaultValue={row?.transcript ?? ""} className={`${inputClass} min-h-40`} />
+      </Field>
       <SubmitButton>{row ? t.admin.save : t.admin.create}</SubmitButton>
+    </form>
+  );
+}
+
+export function TranscriptImport({ meetingId }: { meetingId: string }) {
+  return (
+    <form action={importTranscript} className="mt-4 grid gap-3 rounded-xl border border-line bg-card p-5">
+      <input type="hidden" name="id" value={meetingId} />
+      <Field label={t.admin.transcriptFile}>
+        <input name="file" type="file" required accept=".txt,.md,.vtt,.srt,text/plain" className={inputClass} />
+      </Field>
+      <p className="text-sm text-muted">{t.admin.transcriptFileHelp}</p>
+      <SubmitButton>{t.admin.importTranscript}</SubmitButton>
     </form>
   );
 }
@@ -411,6 +428,29 @@ export function TaskForm({
         <MeetingSelect meetings={meetings} selected={row?.meetingId ?? preset?.meetingId} />
       </Field>
       <SubmitButton>{row ? t.admin.save : t.admin.create}</SubmitButton>
+    </form>
+  );
+}
+
+export function MeetingTaskForm({ meetingId }: { meetingId: string }) {
+  return (
+    <form action={saveTask} className="mt-4 grid gap-4">
+      <input type="hidden" name="meetingId" value={meetingId} />
+      <input type="hidden" name="returnTo" value={`/admin/meetings/${meetingId}`} />
+      <input type="hidden" name="status" value="open" />
+      <Field label={t.admin.title}>
+        <input name="title" required className={inputClass} />
+      </Field>
+      <Field label={t.admin.details}>
+        <textarea name="details" className={inputClass} />
+      </Field>
+      <Field label={t.admin.owner}>
+        <input name="ownerName" className={inputClass} />
+      </Field>
+      <Field label={t.admin.due}>
+        <input name="dueOn" type="date" className={inputClass} />
+      </Field>
+      <SubmitButton>{t.admin.create}</SubmitButton>
     </form>
   );
 }

@@ -20,10 +20,16 @@ function day(value: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : null;
 }
 
+function meetingReturn(value: string) {
+  const id = value.startsWith("/admin/meetings/") ? optionalId(value.slice("/admin/meetings/".length)) : null;
+  return id ? `/admin/meetings/${id}` : null;
+}
+
 export async function saveTask(formData: FormData) {
   const user = await requireUser();
   const id = optionalId(textValue(formData, "id"));
-  const path = id ? `/admin/tasks/${id}` : "/admin/tasks";
+  const returnTo = meetingReturn(textValue(formData, "returnTo"));
+  const path = id ? `/admin/tasks/${id}` : (returnTo ?? "/admin/tasks");
   const title = textValue(formData, "title");
   const status = textValue(formData, "status") || "open";
   if (!title || !isTaskStatus(status)) go(path, { error: "invalid" });
@@ -58,7 +64,8 @@ export async function saveTask(formData: FormData) {
         summary: title,
       });
       revalidatePath("/admin/tasks");
-      go("/admin/tasks", { notice: "created" });
+      if (returnTo) revalidatePath(returnTo);
+      go(returnTo ?? "/admin/tasks", { notice: "created" });
     }
   } catch (error) {
     bail(path, error);
@@ -72,7 +79,9 @@ export async function setTaskStatus(formData: FormData) {
   const user = await requireUser();
   const id = optionalId(textValue(formData, "id"));
   const status = textValue(formData, "status");
-  if (!id || !isTaskStatus(status)) go("/admin/tasks", { error: "invalid" });
+  const meetingId = optionalId(textValue(formData, "meeting"));
+  const back = meetingId ? { meeting: meetingId } : {};
+  if (!id || !isTaskStatus(status)) go("/admin/tasks", { ...back, error: "invalid" });
   try {
     const db = getDb();
     await db.update(tasks).set({ status, updatedAt: new Date() }).where(eq(tasks.id, id));
@@ -84,8 +93,11 @@ export async function setTaskStatus(formData: FormData) {
       summary: status,
     });
   } catch (error) {
-    bail("/admin/tasks", error);
+    rethrow(error);
+    if (isDbUnavailable(error)) go("/admin/tasks", { ...back, error: "unavailable" });
+    go("/admin/tasks", { ...back, error: "generic" });
   }
   revalidatePath("/admin/tasks");
-  go("/admin/tasks", { notice: "saved" });
+  if (meetingId) revalidatePath(`/admin/meetings/${meetingId}`);
+  go("/admin/tasks", { ...back, notice: "saved" });
 }

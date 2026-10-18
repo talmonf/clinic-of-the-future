@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { asc, desc, eq } from "drizzle-orm";
 import { TaskForm } from "@/components/admin/forms";
 import { BackLink, Flash, PageIntro } from "@/components/admin/ui";
@@ -36,6 +37,13 @@ export default async function TaskPage({
       <BackLink href="/admin/tasks" />
       <PageIntro title={row.title} />
       <Flash {...flash} />
+      {row.meetingId ? (
+        <p className="mb-4 text-sm">
+          <Link className="text-olive underline" href={`/admin/meetings/${row.meetingId}`}>
+            {t.admin.meeting}: {meetingRows.find((meeting) => meeting.id === row.meetingId)?.title ?? t.admin.open}
+          </Link>
+        </p>
+      ) : null}
       <TaskForm row={row} docs={docs} meetings={meetingRows} />
     </div>
   );

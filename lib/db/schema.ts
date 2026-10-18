@@ -1,4 +1,5 @@
 import {
+  bigint,
   boolean,
   date,
   integer,
@@ -135,6 +136,11 @@ export const meetings = pgTable("meetings", {
   clarifications: text("clarifications").notNull().default(""),
   gaps: text("gaps").notNull().default(""),
   summary: text("summary").notNull().default(""),
+  transcript: text("transcript").notNull().default(""),
+  recordingKey: text("recording_key"),
+  recordingName: text("recording_name"),
+  recordingType: text("recording_type"),
+  recordingBytes: bigint("recording_bytes", { mode: "number" }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

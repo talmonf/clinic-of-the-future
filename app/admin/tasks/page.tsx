@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { asc, desc } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import { TaskForm } from "@/components/admin/forms";
 import { quietClass, Flash, PageIntro } from "@/components/admin/ui";
 import { setTaskStatus } from "@/lib/actions/tasks";
@@ -7,22 +7,38 @@ import { getDb } from "@/lib/db";
 import { documents, meetings, tasks } from "@/lib/db/schema";
 import { formatDay, one } from "@/lib/format";
 import { t } from "@/lib/i18n";
+import { optionalId } from "@/lib/options";
 import { type SearchParams } from "@/lib/page";
 import { requireUser } from "@/lib/session";
 
 export default async function TasksPage({ searchParams }: { searchParams: SearchParams }) {
   await requireUser();
   const params = await searchParams;
+  const meetingId = optionalId(one(params.meeting) ?? "");
   const db = getDb();
   const [rows, docs, meetingRows] = await Promise.all([
-    db.select().from(tasks).orderBy(desc(tasks.createdAt)),
+    meetingId
+      ? db.select().from(tasks).where(eq(tasks.meetingId, meetingId)).orderBy(desc(tasks.createdAt))
+      : db.select().from(tasks).orderBy(desc(tasks.createdAt)),
     db.select({ id: documents.id, number: documents.number, title: documents.title }).from(documents).orderBy(asc(documents.number)),
     db.select({ id: meetings.id, title: meetings.title }).from(meetings).orderBy(desc(meetings.createdAt)),
   ]);
+  const filteredMeeting = meetingId ? meetingRows.find((meeting) => meeting.id === meetingId) : undefined;
   return (
     <div>
       <PageIntro title={t.nav.tasks} />
       <Flash error={one(params.error)} notice={one(params.notice)} />
+      {filteredMeeting ? (
+        <p className="mb-4 text-sm">
+          <Link className="text-olive underline" href={`/admin/meetings/${filteredMeeting.id}`}>
+            {t.admin.filteredMeeting}: {filteredMeeting.title}
+          </Link>
+          {" · "}
+          <Link className="text-olive underline" href="/admin/tasks">
+            {t.admin.allTasks}
+          </Link>
+        </p>
+      ) : null}
       <details className="mb-8 rounded-lg border border-line bg-card p-4" open={Boolean(one(params.meeting) || one(params.document))}>
         <summary className="cursor-pointer">{t.admin.create}</summary>
         <div className="mt-4 max-w-2xl">
@@ -45,9 +61,15 @@ export default async function TasksPage({ searchParams }: { searchParams: Search
                 {row.ownerName ? ` · ${row.ownerName}` : ""}
                 {row.dueOn ? ` · ${formatDay(row.dueOn)}` : ""}
               </p>
+              {row.meetingId ? (
+                <Link href={`/admin/meetings/${row.meetingId}`} className="mt-1 block text-sm text-olive underline">
+                  {meetingRows.find((meeting) => meeting.id === row.meetingId)?.title ?? t.admin.meeting}
+                </Link>
+              ) : null}
             </div>
             <form action={setTaskStatus}>
               <input type="hidden" name="id" value={row.id} />
+              {meetingId ? <input type="hidden" name="meeting" value={meetingId} /> : null}
               <input type="hidden" name="status" value={row.status === "open" ? "done" : "open"} />
               <button className={quietClass}>{row.status === "open" ? t.admin.markDone : t.admin.reopen}</button>
             </form>

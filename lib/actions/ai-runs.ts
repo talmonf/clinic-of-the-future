@@ -11,6 +11,12 @@ import { go, rethrow } from "@/lib/go";
 import { optionalId } from "@/lib/options";
 import { requireUser } from "@/lib/session";
 
+function clip(value: string, limit = 120_000) {
+  const text = value.trim();
+  if (text.length <= limit) return text;
+  return `${text.slice(0, limit)}\n[קוצר]`;
+}
+
 function targetPath(type: string, id: string) {
   return type === "meeting" ? `/admin/meetings/${id}` : `/admin/documents/${id}`;
 }
@@ -57,6 +63,7 @@ export async function runAgent(formData: FormData) {
         `בירורים: ${meeting.clarifications}`,
         `פערים: ${meeting.gaps}`,
         `סיכום נוכחי: ${meeting.summary}`,
+        `תמלול:\n${clip(meeting.transcript)}`,
       ].join("\n");
     }
 
