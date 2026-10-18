@@ -243,12 +243,12 @@ export function MeetingForm({
 
 export function TranscriptImport({ meetingId }: { meetingId: string }) {
   return (
-    <form action={importTranscript} className="mt-4 grid gap-3 rounded-xl border border-line bg-card p-5">
+    <form action={importTranscript} className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-line bg-card p-5">
       <input type="hidden" name="id" value={meetingId} />
-      <p className="text-sm text-muted">{t.admin.transcriptFile}</p>
+      <p className="basis-full text-sm text-muted">{t.admin.transcriptFile}</p>
       <FileButton name="file" accept=".txt,.md,.vtt,.srt,text/plain" required />
-      <p className="text-sm text-muted">{t.admin.transcriptFileHelp}</p>
       <SubmitButton>{t.admin.importTranscript}</SubmitButton>
+      <p className="basis-full text-sm text-muted">{t.admin.transcriptFileHelp}</p>
     </form>
   );
 }

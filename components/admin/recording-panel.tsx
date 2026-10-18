@@ -117,21 +117,21 @@ export function RecordingPanel({ meetingId, recording }: { meetingId: string; re
           </form>
         </div>
       ) : null}
-      <form onSubmit={onSubmit} className="mt-4 grid gap-3">
+      <form onSubmit={onSubmit} className="mt-4 flex flex-wrap items-center gap-3">
         <FileButton
           name="file"
           accept="audio/*,video/mp4,video/webm,.mp3,.m4a,.wav,.ogg,.mp4,.webm"
           required
           disabled={pending}
         />
-        {error ? <p className="text-sm text-clay">{errorText(error)}</p> : null}
-        <button type="submit" className={`${buttonClass} w-full`} disabled={pending}>
+        <button type="submit" className={buttonClass} disabled={pending}>
           {pending
             ? `${t.admin.uploading}${progress === null ? "" : ` ${progress}%`}`
             : recording
               ? t.admin.replaceRecording
               : t.admin.uploadRecording}
         </button>
+        {error ? <p className="basis-full text-sm text-clay">{errorText(error)}</p> : null}
       </form>
     </section>
   );
