@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { confirmRecordingUpload, prepareRecordingUpload, removeRecording } from "@/lib/actions/meetings";
+import { FileButton } from "@/components/admin/file-button";
 import { t } from "@/lib/i18n";
 import { buttonClass, quietClass } from "@/components/admin/ui";
 
@@ -34,7 +35,7 @@ function putFile(url: string, file: File, contentType: string, onProgress: (perc
     };
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) resolve();
-      else reject(new Error(String(xhr.status)));
+      else reject(new Error(`status ${xhr.status}`));
     };
     xhr.onerror = () => reject(new Error("network"));
     xhr.send(file);
@@ -78,8 +79,9 @@ export function RecordingPanel({ meetingId, recording }: { meetingId: string; re
       confirmed.set("fileName", file.name);
       confirmed.set("contentType", result.contentType);
       confirmed.set("bytes", String(file.size));
-    } catch {
-      setError("upload_failed");
+    } catch (uploadError) {
+      console.error("recording upload failed", uploadError);
+      setError(uploadError instanceof Error && uploadError.message === "network" ? "upload_blocked" : "upload_failed");
       setPending(false);
       setProgress(null);
       return;
@@ -116,16 +118,14 @@ export function RecordingPanel({ meetingId, recording }: { meetingId: string; re
         </div>
       ) : null}
       <form onSubmit={onSubmit} className="mt-4 grid gap-3">
-        <input
+        <FileButton
           name="file"
-          type="file"
-          required
           accept="audio/*,video/mp4,video/webm,.mp3,.m4a,.wav,.ogg,.mp4,.webm"
-          className="text-sm"
+          required
           disabled={pending}
         />
         {error ? <p className="text-sm text-clay">{errorText(error)}</p> : null}
-        <button type="submit" className={buttonClass} disabled={pending}>
+        <button type="submit" className={`${buttonClass} w-full`} disabled={pending}>
           {pending
             ? `${t.admin.uploading}${progress === null ? "" : ` ${progress}%`}`
             : recording

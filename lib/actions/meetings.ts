@@ -11,11 +11,11 @@ import { optionalId } from "@/lib/options";
 import { requireUser } from "@/lib/session";
 import {
   MAX_RECORDING_BYTES,
-  S3NotConfiguredError,
   assertRecordingStored,
   deleteRecordingObject,
   isMissingObject,
   newRecordingKey,
+  isS3NotConfigured,
   presignRecordingPut,
   recordingContentType,
   recordingKeyForMeeting,
@@ -108,12 +108,13 @@ export async function prepareRecordingUpload(formData: FormData): Promise<Prepar
     const [meeting] = await db.select({ id: meetings.id }).from(meetings).where(eq(meetings.id, meetingId)).limit(1);
     if (!meeting) return { error: "not_found" };
     const key = newRecordingKey(meetingId, fileName);
-    const url = await presignRecordingPut(key, contentType, bytes);
+    const url = await presignRecordingPut(key, contentType);
     return { url, key, contentType };
   } catch (error) {
     rethrow(error);
-    if (error instanceof S3NotConfiguredError) return { error: "s3_unconfigured" };
+    if (isS3NotConfigured(error)) return { error: "s3_unconfigured" };
     if (isDbUnavailable(error)) return { error: "unavailable" };
+    console.error("recording prepare failed", error instanceof Error ? `${error.name}: ${error.message}` : "unknown");
     return { error: "upload_failed" };
   }
 }
@@ -138,7 +139,10 @@ export async function confirmRecordingUpload(formData: FormData) {
       .limit(1);
     if (!meeting) go(path, { error: "not_found" });
     const stored = await assertRecordingStored(key, contentType, bytes);
-    if (!stored) go(path, { error: "upload_failed" });
+    if (!stored) {
+      console.error("recording confirm failed: object missing or does not match");
+      go(path, { error: "upload_failed" });
+    }
     await db
       .update(meetings)
       .set({
@@ -155,7 +159,7 @@ export async function confirmRecordingUpload(formData: FormData) {
         await deleteRecordingObject(previous);
       } catch (error) {
         console.error("previous recording delete failed");
-        if (!(error instanceof S3NotConfiguredError) && !isMissingObject(error)) {
+        if (!isS3NotConfigured(error) && !isMissingObject(error)) {
           console.error(error);
         }
       }
@@ -169,7 +173,8 @@ export async function confirmRecordingUpload(formData: FormData) {
     });
   } catch (error) {
     rethrow(error);
-    if (error instanceof S3NotConfiguredError) go(path, { error: "s3_unconfigured" });
+    if (isS3NotConfigured(error)) go(path, { error: "s3_unconfigured" });
+    console.error("recording confirm failed", error instanceof Error ? `${error.name}: ${error.message}` : "unknown");
     bail(path, error);
   }
   revalidatePath(path);
@@ -209,7 +214,7 @@ export async function removeRecording(formData: FormData) {
     });
   } catch (error) {
     rethrow(error);
-    if (error instanceof S3NotConfiguredError) go(path, { error: "s3_unconfigured" });
+    if (isS3NotConfigured(error)) go(path, { error: "s3_unconfigured" });
     bail(path, error);
   }
   revalidatePath(path);

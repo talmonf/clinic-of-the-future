@@ -8,6 +8,7 @@ import { toJerusalemInput } from "@/lib/format";
 import { t } from "@/lib/i18n";
 import { appointmentKinds, contactCategories, contactStatuses, taskStatuses } from "@/lib/options";
 import { SubmitButton } from "@/components/submit-button";
+import { FileButton } from "@/components/admin/file-button";
 import { Field, LevelInput, inputClass } from "@/components/admin/ui";
 
 type DocOption = { id: string; number: number | null; title: string };
@@ -204,6 +205,7 @@ export function MeetingForm({
   return (
     <form action={saveMeeting} className="grid gap-4">
       {row ? <input type="hidden" name="id" value={row.id} /> : null}
+      {!row ? <p className="text-sm leading-6 text-muted">{t.admin.meetingAfterCreate}</p> : null}
       <Field label={t.admin.title}>
         <input name="title" required defaultValue={row?.title ?? ""} className={inputClass} />
       </Field>
@@ -243,9 +245,8 @@ export function TranscriptImport({ meetingId }: { meetingId: string }) {
   return (
     <form action={importTranscript} className="mt-4 grid gap-3 rounded-xl border border-line bg-card p-5">
       <input type="hidden" name="id" value={meetingId} />
-      <Field label={t.admin.transcriptFile}>
-        <input name="file" type="file" required accept=".txt,.md,.vtt,.srt,text/plain" className={inputClass} />
-      </Field>
+      <p className="text-sm text-muted">{t.admin.transcriptFile}</p>
+      <FileButton name="file" accept=".txt,.md,.vtt,.srt,text/plain" required />
       <p className="text-sm text-muted">{t.admin.transcriptFileHelp}</p>
       <SubmitButton>{t.admin.importTranscript}</SubmitButton>
     </form>

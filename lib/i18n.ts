@@ -120,6 +120,7 @@ export const he = {
     file_type: "סוג הקובץ אינו נתמך.",
     file_size: "הקובץ גדול מדי, או שהוא ריק.",
     upload_failed: "ההעלאה לא הושלמה.",
+    upload_blocked: "הדפדפן נחסם בדרך אל S3. בדקו שכלל ה־CORS כולל את הכתובת שבשורת הכתובת.",
   },
   admin: {
     workOrder:
@@ -183,6 +184,8 @@ export const he = {
     clarifications: "בירורים",
     gaps: "פערים",
     summary: "סיכום",
+    meetingAfterCreate: "אחרי יצירת הפגישה אפשר להעלות את ההקלטה, וגם תמלול או סיכום.",
+    chooseFile: "בחירת קובץ",
     transcript: "תמלול",
     transcriptFile: "קובץ תמלול",
     transcriptFileHelp: "קובץ txt, md, vtt או srt, עד כ־900KB. הייבוא מחליף את התמלול השמור.",
@@ -342,6 +345,7 @@ export const en: typeof he = {
     file_type: "This file type is not supported.",
     file_size: "The file is too large, or it is empty.",
     upload_failed: "The upload did not finish.",
+    upload_blocked: "The browser was blocked on the way to S3. Check that the CORS rule includes the address in the address bar.",
   },
   admin: {
     workOrder:
@@ -405,6 +409,8 @@ export const en: typeof he = {
     clarifications: "Clarifications",
     gaps: "Gaps",
     summary: "Summary",
+    meetingAfterCreate: "After you create the meeting, you can upload the recording, and a transcript or summary.",
+    chooseFile: "Choose file",
     transcript: "Transcript",
     transcriptFile: "Transcript file",
     transcriptFileHelp: "A txt, md, vtt, or srt file, up to about 900KB. Importing replaces the saved transcript.",

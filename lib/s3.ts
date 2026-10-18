@@ -81,15 +81,26 @@ export function newRecordingKey(meetingId: string, fileName: string) {
   return `meetings/${meetingId}/${randomUUID()}/${safeFileName(fileName)}`;
 }
 
-export async function presignRecordingPut(key: string, contentType: string, bytes: number) {
+export function isS3NotConfigured(error: unknown) {
+  return (
+    error instanceof S3NotConfiguredError ||
+    (error instanceof Error && error.name === "S3NotConfiguredError")
+  );
+}
+
+export async function presignRecordingPut(key: string, contentType: string) {
   const { bucket, client: s3 } = client();
   const command = new PutObjectCommand({
     Bucket: bucket,
     Key: key,
     ContentType: contentType,
-    ContentLength: bytes,
   });
-  const url = await getSignedUrl(s3, command, { expiresIn: PUT_EXPIRES_SECONDS });
+  // Do not sign content-length. The browser sets that header itself, and a signed
+  // value that does not match produces a signature error with no server log.
+  const url = await getSignedUrl(s3, command, {
+    expiresIn: PUT_EXPIRES_SECONDS,
+    unsignableHeaders: new Set(["content-length"]),
+  });
   return url;
 }
 
