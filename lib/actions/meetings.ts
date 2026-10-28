@@ -33,7 +33,7 @@ function bail(path: string, error: unknown): never {
 export async function saveMeeting(formData: FormData) {
   const user = await requireUser();
   const id = optionalId(textValue(formData, "id"));
-  const path = id ? `/admin/meetings/${id}` : "/admin/meetings";
+  const path = id ? `/admin/meetings/${id}` : "/admin/meetings/new";
   const title = textValue(formData, "title");
   if (!title) go(path, { error: "invalid" });
   const startsAt = meetingStartsAt(textValue(formData, "meetingDate"), textValue(formData, "meetingTime"));
@@ -94,15 +94,13 @@ export async function saveMeeting(formData: FormData) {
         entityId: row?.id,
         summary: title,
       });
-      revalidatePath("/admin/meetings");
-      if (row?.id) go(`/admin/meetings/${row.id}`, { notice: "created" });
-      go("/admin/meetings", { notice: "created" });
     }
   } catch (error) {
     bail(path, error);
   }
-  revalidatePath(path);
-  go(path, { notice: "saved" });
+  revalidatePath("/admin/meetings");
+  if (id) revalidatePath(path);
+  go("/admin/meetings", { notice: id ? "saved" : "created" });
 }
 
 function wholeBytes(value: string) {
