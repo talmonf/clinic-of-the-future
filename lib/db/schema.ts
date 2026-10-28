@@ -137,6 +137,7 @@ export const meetings = pgTable("meetings", {
   clarifications: text("clarifications").notNull().default(""),
   gaps: text("gaps").notNull().default(""),
   summary: text("summary").notNull().default(""),
+  detailedSummary: text("detailed_summary").notNull().default(""),
   attendeesOther: text("attendees_other").notNull().default(""),
   transcript: text("transcript").notNull().default(""),
   recordingKey: text("recording_key"),

@@ -203,6 +203,7 @@ export function MeetingForm({
     clarifications: string;
     gaps: string;
     summary: string;
+    detailedSummary: string;
     attendeesOther: string;
     transcript: string;
   };
@@ -231,27 +232,20 @@ export function MeetingForm({
       <details className={sectionClass}>
         <summary className="cursor-pointer">{t.admin.advanced}</summary>
         <div className="mt-4 grid gap-4">
-          <Field label={t.admin.document}>
+          <Field label={t.admin.meetingCategory}>
             <DocSelect docs={docs} selected={row?.documentId} />
           </Field>
-          <Field label={t.admin.agenda}>
-            <textarea name="agenda" defaultValue={row?.agenda ?? ""} className={inputClass} />
-          </Field>
-          <Field label={t.admin.prep}>
-            <textarea name="prepQuestions" defaultValue={row?.prepQuestions ?? ""} className={inputClass} />
-          </Field>
-          <Field label={t.admin.discussion}>
-            <textarea name="discussion" defaultValue={row?.discussion ?? ""} className={inputClass} />
-          </Field>
-          <Field label={t.admin.clarifications}>
-            <textarea name="clarifications" defaultValue={row?.clarifications ?? ""} className={inputClass} />
-          </Field>
-          <Field label={t.admin.gaps}>
-            <textarea name="gaps" defaultValue={row?.gaps ?? ""} className={inputClass} />
+          <Field label={t.admin.detailedSummary}>
+            <textarea name="detailedSummary" defaultValue={row?.detailedSummary ?? ""} className={`${inputClass} min-h-32`} />
           </Field>
           <Field label={t.admin.transcript}>
             <textarea name="transcript" defaultValue={row?.transcript ?? ""} className={`${inputClass} min-h-40`} />
           </Field>
+          <input type="hidden" name="agenda" value={row?.agenda ?? ""} />
+          <input type="hidden" name="prepQuestions" value={row?.prepQuestions ?? ""} />
+          <input type="hidden" name="discussion" value={row?.discussion ?? ""} />
+          <input type="hidden" name="clarifications" value={row?.clarifications ?? ""} />
+          <input type="hidden" name="gaps" value={row?.gaps ?? ""} />
         </div>
       </details>
       <SubmitButton>{row ? t.admin.save : t.admin.create}</SubmitButton>

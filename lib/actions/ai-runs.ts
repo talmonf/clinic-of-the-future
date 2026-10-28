@@ -70,7 +70,8 @@ export async function runAgent(formData: FormData) {
         `דיון: ${meeting.discussion}`,
         `בירורים: ${meeting.clarifications}`,
         `פערים: ${meeting.gaps}`,
-        `סיכום נוכחי: ${meeting.summary}`,
+        `סיכום קצר: ${meeting.summary}`,
+        `סיכום מפורט: ${meeting.detailedSummary}`,
         `תמלול:\n${clip(meeting.transcript)}`,
       ].join("\n");
     }

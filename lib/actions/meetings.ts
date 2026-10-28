@@ -56,6 +56,7 @@ export async function saveMeeting(formData: FormData) {
     clarifications: textValue(formData, "clarifications"),
     gaps: textValue(formData, "gaps"),
     summary: textValue(formData, "summary"),
+    detailedSummary: textValue(formData, "detailedSummary"),
     attendeesOther: joinMeetingOtherNames(formData.getAll("attendeesOther").map(String)).join("\n"),
     transcript: textValue(formData, "transcript"),
     updatedAt: new Date(),
