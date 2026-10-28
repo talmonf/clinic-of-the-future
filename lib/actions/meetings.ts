@@ -1,11 +1,11 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { recordAudit } from "@/lib/audit";
 import { getDb, isDbUnavailable } from "@/lib/db";
-import { meetings } from "@/lib/db/schema";
-import { fromJerusalemInput, textValue } from "@/lib/format";
+import { contacts, meetingAttendees, meetings } from "@/lib/db/schema";
+import { meetingStartsAt, textValue } from "@/lib/format";
 import { go, rethrow } from "@/lib/go";
 import { optionalId } from "@/lib/options";
 import { requireUser } from "@/lib/session";
@@ -36,10 +36,19 @@ export async function saveMeeting(formData: FormData) {
   const path = id ? `/admin/meetings/${id}` : "/admin/meetings";
   const title = textValue(formData, "title");
   if (!title) go(path, { error: "invalid" });
-  const startsRaw = textValue(formData, "startsAt");
+  const startsAt = meetingStartsAt(textValue(formData, "meetingDate"), textValue(formData, "meetingTime"));
+  if (startsAt === "invalid") go(path, { error: "invalid" });
+  const contactIds = [
+    ...new Set(
+      formData
+        .getAll("contactId")
+        .map((value) => optionalId(String(value)))
+        .filter((value): value is string => Boolean(value)),
+    ),
+  ];
   const values = {
     title,
-    startsAt: startsRaw ? fromJerusalemInput(startsRaw) : null,
+    startsAt,
     documentId: optionalId(textValue(formData, "documentId")),
     agenda: textValue(formData, "agenda"),
     prepQuestions: textValue(formData, "prepQuestions"),
@@ -47,15 +56,26 @@ export async function saveMeeting(formData: FormData) {
     clarifications: textValue(formData, "clarifications"),
     gaps: textValue(formData, "gaps"),
     summary: textValue(formData, "summary"),
+    attendeesOther: textValue(formData, "attendeesOther"),
     transcript: textValue(formData, "transcript"),
     updatedAt: new Date(),
   };
-  if (startsRaw && !values.startsAt) go(path, { error: "invalid" });
 
   try {
     const db = getDb();
+    if (contactIds.length) {
+      const found = await db.select({ id: contacts.id }).from(contacts).where(inArray(contacts.id, contactIds));
+      if (found.length !== contactIds.length) go(path, { error: "invalid" });
+    }
+    const replaceAttendees = async (meetingId: string) => {
+      await db.delete(meetingAttendees).where(eq(meetingAttendees.meetingId, meetingId));
+      if (contactIds.length) {
+        await db.insert(meetingAttendees).values(contactIds.map((contactId) => ({ meetingId, contactId })));
+      }
+    };
     if (id) {
       await db.update(meetings).set(values).where(eq(meetings.id, id));
+      await replaceAttendees(id);
       await recordAudit({
         actorEmail: user.email,
         action: "meeting.update",
@@ -65,6 +85,7 @@ export async function saveMeeting(formData: FormData) {
       });
     } else {
       const [row] = await db.insert(meetings).values(values).returning({ id: meetings.id });
+      if (row?.id) await replaceAttendees(row.id);
       await recordAudit({
         actorEmail: user.email,
         action: "meeting.create",

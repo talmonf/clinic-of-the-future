@@ -1,11 +1,11 @@
 "use server";
 
-import { and, eq, isNull } from "drizzle-orm";
+import { and, asc, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { AiNotConfiguredError, completeWithClaude, parseTaskList } from "@/lib/ai";
 import { recordAudit } from "@/lib/audit";
 import { getDb, isDbUnavailable } from "@/lib/db";
-import { aiAgents, aiRuns, documentVersions, documents, meetings, notes, tasks } from "@/lib/db/schema";
+import { aiAgents, aiRuns, contacts, documentVersions, documents, meetingAttendees, meetings, notes, tasks } from "@/lib/db/schema";
 import { textValue } from "@/lib/format";
 import { go, rethrow } from "@/lib/go";
 import { optionalId } from "@/lib/options";
@@ -55,8 +55,16 @@ export async function runAgent(formData: FormData) {
     } else {
       const [meeting] = await db.select().from(meetings).where(eq(meetings.id, targetId)).limit(1);
       if (!meeting) go(path, { error: "not_found" });
+      const attendeeRows = await db
+        .select({ name: contacts.name })
+        .from(meetingAttendees)
+        .innerJoin(contacts, eq(contacts.id, meetingAttendees.contactId))
+        .where(eq(meetingAttendees.meetingId, meeting.id))
+        .orderBy(asc(contacts.name));
+      const attendeeNames = [...attendeeRows.map((person) => person.name), meeting.attendeesOther.trim()].filter(Boolean);
       promptInput = [
         `פגישה: ${meeting.title}`,
+        `משתתפים: ${attendeeNames.join(", ")}`,
         `סדר יום: ${meeting.agenda}`,
         `שאלות: ${meeting.prepQuestions}`,
         `דיון: ${meeting.discussion}`,

@@ -4,7 +4,8 @@ import { saveContact } from "@/lib/actions/contacts";
 import { saveMeeting, importTranscript } from "@/lib/actions/meetings";
 import { saveTask } from "@/lib/actions/tasks";
 import { saveAgent } from "@/lib/actions/agents";
-import { toJerusalemInput } from "@/lib/format";
+import { MeetingAttendees, MeetingWhenFields } from "@/components/admin/meeting-fields";
+import { splitJerusalemWhen, toJerusalemInput } from "@/lib/format";
 import { t } from "@/lib/i18n";
 import { appointmentKinds, contactCategories, contactStatuses, taskStatuses } from "@/lib/options";
 import { SubmitButton } from "@/components/submit-button";
@@ -183,9 +184,13 @@ export function RiskForm({
   );
 }
 
+const sectionClass = "rounded-lg border border-line bg-card p-4";
+
 export function MeetingForm({
   row,
   docs,
+  contacts,
+  attendeeIds = [],
 }: {
   row?: {
     id: string;
@@ -198,44 +203,57 @@ export function MeetingForm({
     clarifications: string;
     gaps: string;
     summary: string;
+    attendeesOther: string;
     transcript: string;
   };
   docs: DocOption[];
+  contacts: { id: string; name: string }[];
+  attendeeIds?: string[];
 }) {
+  const when = splitJerusalemWhen(row?.startsAt);
   return (
     <form action={saveMeeting} className="grid gap-4">
       {row ? <input type="hidden" name="id" value={row.id} /> : null}
       {!row ? <p className="text-sm leading-6 text-muted">{t.admin.meetingAfterCreate}</p> : null}
-      <Field label={t.admin.title}>
-        <input name="title" required defaultValue={row?.title ?? ""} className={inputClass} />
-      </Field>
-      <Field label={t.admin.when}>
-        <input name="startsAt" type="datetime-local" defaultValue={toJerusalemInput(row?.startsAt)} className={inputClass} />
-      </Field>
-      <Field label={t.admin.document}>
-        <DocSelect docs={docs} selected={row?.documentId} />
-      </Field>
-      <Field label={t.admin.agenda}>
-        <textarea name="agenda" defaultValue={row?.agenda ?? ""} className={inputClass} />
-      </Field>
-      <Field label={t.admin.prep}>
-        <textarea name="prepQuestions" defaultValue={row?.prepQuestions ?? ""} className={inputClass} />
-      </Field>
-      <Field label={t.admin.discussion}>
-        <textarea name="discussion" defaultValue={row?.discussion ?? ""} className={inputClass} />
-      </Field>
-      <Field label={t.admin.clarifications}>
-        <textarea name="clarifications" defaultValue={row?.clarifications ?? ""} className={inputClass} />
-      </Field>
-      <Field label={t.admin.gaps}>
-        <textarea name="gaps" defaultValue={row?.gaps ?? ""} className={inputClass} />
-      </Field>
-      <Field label={t.admin.summary}>
-        <textarea name="summary" defaultValue={row?.summary ?? ""} className={inputClass} />
-      </Field>
-      <Field label={t.admin.transcript}>
-        <textarea name="transcript" defaultValue={row?.transcript ?? ""} className={`${inputClass} min-h-40`} />
-      </Field>
+      <details open className={sectionClass}>
+        <summary className="cursor-pointer">{t.admin.basic}</summary>
+        <div className="mt-4 grid gap-4">
+          <MeetingWhenFields date={when.date} time={when.time} />
+          <MeetingAttendees contacts={contacts} selectedIds={attendeeIds} other={row?.attendeesOther ?? ""} />
+          <Field label={t.admin.title}>
+            <input name="title" required defaultValue={row?.title ?? ""} className={inputClass} />
+          </Field>
+          <Field label={t.admin.briefSummary}>
+            <textarea name="summary" defaultValue={row?.summary ?? ""} className={inputClass} />
+          </Field>
+        </div>
+      </details>
+      <details className={sectionClass}>
+        <summary className="cursor-pointer">{t.admin.advanced}</summary>
+        <div className="mt-4 grid gap-4">
+          <Field label={t.admin.document}>
+            <DocSelect docs={docs} selected={row?.documentId} />
+          </Field>
+          <Field label={t.admin.agenda}>
+            <textarea name="agenda" defaultValue={row?.agenda ?? ""} className={inputClass} />
+          </Field>
+          <Field label={t.admin.prep}>
+            <textarea name="prepQuestions" defaultValue={row?.prepQuestions ?? ""} className={inputClass} />
+          </Field>
+          <Field label={t.admin.discussion}>
+            <textarea name="discussion" defaultValue={row?.discussion ?? ""} className={inputClass} />
+          </Field>
+          <Field label={t.admin.clarifications}>
+            <textarea name="clarifications" defaultValue={row?.clarifications ?? ""} className={inputClass} />
+          </Field>
+          <Field label={t.admin.gaps}>
+            <textarea name="gaps" defaultValue={row?.gaps ?? ""} className={inputClass} />
+          </Field>
+          <Field label={t.admin.transcript}>
+            <textarea name="transcript" defaultValue={row?.transcript ?? ""} className={`${inputClass} min-h-40`} />
+          </Field>
+        </div>
+      </details>
       <SubmitButton>{row ? t.admin.save : t.admin.create}</SubmitButton>
     </form>
   );

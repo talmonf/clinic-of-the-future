@@ -70,6 +70,55 @@ export function fromJerusalemInput(value: string) {
   return new Date(utcGuess.getTime() - offset);
 }
 
+/** Empty string when blank, canonical DD/MM/YYYY when valid, null when not a real date. */
+export function normalizeMeetingDate(raw: string) {
+  const value = raw.trim();
+  if (!value) return "";
+  const digits = /^\d{8}$/.test(value) ? `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4)}` : value;
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(digits);
+  if (!match) return null;
+  const day = Number(match[1]);
+  const month = Number(match[2]);
+  const year = Number(match[3]);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return null;
+  return `${String(day).padStart(2, "0")}/${String(month).padStart(2, "0")}/${String(year).padStart(4, "0")}`;
+}
+
+/** Empty string when blank, canonical HH:mm when valid, null otherwise. Four digits such as 1300 become 13:00. */
+export function normalizeMeetingTime(raw: string) {
+  const value = raw.trim();
+  if (!value) return "";
+  const digits = /^(\d{4})$/.exec(value);
+  const clock = /^(\d{1,2}):(\d{2})$/.exec(value);
+  const hours = digits ? digits[1].slice(0, 2) : clock?.[1];
+  const minutes = digits ? digits[1].slice(2) : clock?.[2];
+  if (hours === undefined || minutes === undefined) return null;
+  const hour = Number(hours);
+  const minute = Number(minutes);
+  if (!Number.isInteger(hour) || !Number.isInteger(minute) || hour > 23 || minute > 59) return null;
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
+
+/** Null when both parts are empty, a Date for a valid Jerusalem wall time, or "invalid". */
+export function meetingStartsAt(dateRaw: string, timeRaw: string): Date | null | "invalid" {
+  const date = normalizeMeetingDate(dateRaw);
+  const time = normalizeMeetingTime(timeRaw);
+  if (date === null || time === null) return "invalid";
+  if (!date && !time) return null;
+  if (!date || !time) return "invalid";
+  const [day, month, year] = date.split("/");
+  return fromJerusalemInput(`${year}-${month}-${day}T${time}`) ?? "invalid";
+}
+
+export function splitJerusalemWhen(value: Date | string | null | undefined) {
+  const combined = toJerusalemInput(value);
+  if (!combined) return { date: "", time: "" };
+  const [isoDate, time] = combined.split("T");
+  const [year, month, day] = isoDate.split("-");
+  return { date: `${day}/${month}/${year}`, time };
+}
+
 export function textValue(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
 }

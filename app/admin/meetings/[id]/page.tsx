@@ -6,7 +6,7 @@ import { NotesPanel } from "@/components/admin/notes-panel";
 import { RecordingPanel } from "@/components/admin/recording-panel";
 import { BackLink, Flash, PageIntro } from "@/components/admin/ui";
 import { getDb } from "@/lib/db";
-import { aiAgents, aiRuns, documents, meetings, notes, tasks } from "@/lib/db/schema";
+import { aiAgents, aiRuns, contacts, documents, meetingAttendees, meetings, notes, tasks } from "@/lib/db/schema";
 import { formatDay } from "@/lib/format";
 import { t } from "@/lib/i18n";
 import { feedback, type SearchParams } from "@/lib/page";
@@ -33,7 +33,7 @@ export default async function MeetingPage({
       </div>
     );
   }
-  const [docs, noteRows, agents, runs, taskRows] = await Promise.all([
+  const [docs, noteRows, agents, runs, taskRows, people, attendeeRows] = await Promise.all([
     db.select({ id: documents.id, number: documents.number, title: documents.title }).from(documents).orderBy(asc(documents.number)),
     db.select().from(notes).where(eq(notes.meetingId, id)).orderBy(desc(notes.createdAt)),
     db.select().from(aiAgents).where(eq(aiAgents.active, true)).orderBy(aiAgents.name),
@@ -53,6 +53,13 @@ export default async function MeetingPage({
       .orderBy(desc(aiRuns.createdAt))
       .limit(5),
     db.select().from(tasks).where(eq(tasks.meetingId, id)).orderBy(desc(tasks.createdAt)),
+    db.select({ id: contacts.id, name: contacts.name }).from(contacts).orderBy(asc(contacts.name)),
+    db
+      .select({ contactId: meetingAttendees.contactId })
+      .from(meetingAttendees)
+      .innerJoin(contacts, eq(contacts.id, meetingAttendees.contactId))
+      .where(eq(meetingAttendees.meetingId, id))
+      .orderBy(asc(contacts.name)),
   ]);
   let playbackUrl: string | null = null;
   let playbackError: string | null = null;
@@ -77,7 +84,7 @@ export default async function MeetingPage({
           {t.nav.tasks}
         </Link>
       </p>
-      <MeetingForm row={row} docs={docs} />
+      <MeetingForm row={row} docs={docs} contacts={people} attendeeIds={attendeeRows.map((person) => person.contactId)} />
       <TranscriptImport meetingId={row.id} />
       <RecordingPanel
         meetingId={row.id}

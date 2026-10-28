@@ -7,6 +7,7 @@ import {
   pgTable,
   text,
   timestamp,
+  primaryKey,
   unique,
   uuid,
 } from "drizzle-orm/pg-core";
@@ -136,6 +137,7 @@ export const meetings = pgTable("meetings", {
   clarifications: text("clarifications").notNull().default(""),
   gaps: text("gaps").notNull().default(""),
   summary: text("summary").notNull().default(""),
+  attendeesOther: text("attendees_other").notNull().default(""),
   transcript: text("transcript").notNull().default(""),
   recordingKey: text("recording_key"),
   recordingName: text("recording_name"),
@@ -144,6 +146,19 @@ export const meetings = pgTable("meetings", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const meetingAttendees = pgTable(
+  "meeting_attendees",
+  {
+    meetingId: uuid("meeting_id")
+      .notNull()
+      .references(() => meetings.id, { onDelete: "cascade" }),
+    contactId: uuid("contact_id")
+      .notNull()
+      .references(() => contacts.id, { onDelete: "cascade" }),
+  },
+  (table) => [primaryKey({ columns: [table.meetingId, table.contactId] })],
+);
 
 export const appointments = pgTable("appointments", {
   id: uuid("id").primaryKey().defaultRandom(),
