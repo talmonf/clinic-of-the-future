@@ -111,6 +111,19 @@ export function meetingStartsAt(dateRaw: string, timeRaw: string): Date | null |
   return fromJerusalemInput(`${year}-${month}-${day}T${time}`) ?? "invalid";
 }
 
+export function meetingOtherNames(value: string) {
+  const names: string[] = [];
+  for (const part of value.split(/[\n,]/)) {
+    const name = part.trim();
+    if (name && !names.includes(name)) names.push(name);
+  }
+  return names;
+}
+
+export function joinMeetingOtherNames(values: string[]) {
+  return meetingOtherNames(values.join("\n"));
+}
+
 export function splitJerusalemWhen(value: Date | string | null | undefined) {
   const combined = toJerusalemInput(value);
   if (!combined) return { date: "", time: "" };

@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { recordAudit } from "@/lib/audit";
 import { getDb, isDbUnavailable } from "@/lib/db";
 import { contacts, meetingAttendees, meetings } from "@/lib/db/schema";
-import { meetingStartsAt, textValue } from "@/lib/format";
+import { joinMeetingOtherNames, meetingStartsAt, textValue } from "@/lib/format";
 import { go, rethrow } from "@/lib/go";
 import { optionalId } from "@/lib/options";
 import { requireUser } from "@/lib/session";
@@ -56,7 +56,7 @@ export async function saveMeeting(formData: FormData) {
     clarifications: textValue(formData, "clarifications"),
     gaps: textValue(formData, "gaps"),
     summary: textValue(formData, "summary"),
-    attendeesOther: textValue(formData, "attendeesOther"),
+    attendeesOther: joinMeetingOtherNames(formData.getAll("attendeesOther").map(String)).join("\n"),
     transcript: textValue(formData, "transcript"),
     updatedAt: new Date(),
   };

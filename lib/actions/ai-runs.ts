@@ -6,7 +6,7 @@ import { AiNotConfiguredError, completeWithClaude, parseTaskList } from "@/lib/a
 import { recordAudit } from "@/lib/audit";
 import { getDb, isDbUnavailable } from "@/lib/db";
 import { aiAgents, aiRuns, contacts, documentVersions, documents, meetingAttendees, meetings, notes, tasks } from "@/lib/db/schema";
-import { textValue } from "@/lib/format";
+import { meetingOtherNames, textValue } from "@/lib/format";
 import { go, rethrow } from "@/lib/go";
 import { optionalId } from "@/lib/options";
 import { requireUser } from "@/lib/session";
@@ -61,7 +61,7 @@ export async function runAgent(formData: FormData) {
         .innerJoin(contacts, eq(contacts.id, meetingAttendees.contactId))
         .where(eq(meetingAttendees.meetingId, meeting.id))
         .orderBy(asc(contacts.name));
-      const attendeeNames = [...attendeeRows.map((person) => person.name), meeting.attendeesOther.trim()].filter(Boolean);
+      const attendeeNames = [...attendeeRows.map((person) => person.name), ...meetingOtherNames(meeting.attendeesOther)];
       promptInput = [
         `פגישה: ${meeting.title}`,
         `משתתפים: ${attendeeNames.join(", ")}`,

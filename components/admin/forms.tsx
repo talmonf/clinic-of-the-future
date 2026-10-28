@@ -220,7 +220,7 @@ export function MeetingForm({
         <div className="mt-4 grid gap-4">
           <MeetingWhenFields date={when.date} time={when.time} />
           <MeetingAttendees contacts={contacts} selectedIds={attendeeIds} other={row?.attendeesOther ?? ""} />
-          <Field label={t.admin.title}>
+          <Field label={t.admin.subject}>
             <input name="title" required defaultValue={row?.title ?? ""} className={inputClass} />
           </Field>
           <Field label={t.admin.briefSummary}>
