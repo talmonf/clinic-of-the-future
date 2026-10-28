@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { asc, eq } from "drizzle-orm";
-import { buttonClass, Flash, inputClass } from "@/components/admin/ui";
+import { MeetingFilters } from "@/components/admin/meeting-filters";
+import { Flash } from "@/components/admin/ui";
 import { getDb } from "@/lib/db";
 import { contacts, meetingAttendees, meetings } from "@/lib/db/schema";
 import { formatWhen, meetingOtherNames } from "@/lib/format";
@@ -82,10 +83,6 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Sea
     }),
     query,
   );
-  const filtering = Boolean(
-    query.q || query.contactId || query.createdFrom || query.createdTo || query.updatedFrom || query.updatedTo,
-  );
-
   return (
     <div>
       <div className="mb-6 flex items-center justify-between gap-4">
@@ -95,65 +92,7 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Sea
         </Link>
       </div>
       <Flash {...flash} />
-      <form method="get" action="/admin/meetings" className="mb-6 grid gap-4 rounded-lg border border-line bg-card p-4 md:grid-cols-2">
-        {query.sort !== "created" || query.dir !== "desc" ? (
-          <>
-            <input type="hidden" name="sort" value={query.sort} />
-            <input type="hidden" name="dir" value={query.dir} />
-          </>
-        ) : null}
-        <div>
-          <p className="text-sm text-muted">{t.admin.createdOn}</p>
-          <div className="mt-1 grid grid-cols-2 gap-3">
-            <label className="block text-sm text-muted">
-              {t.admin.rangeFrom}
-              <input type="date" name="createdFrom" defaultValue={query.createdFrom} dir="ltr" className={inputClass} />
-            </label>
-            <label className="block text-sm text-muted">
-              {t.admin.rangeTo}
-              <input type="date" name="createdTo" defaultValue={query.createdTo} dir="ltr" className={inputClass} />
-            </label>
-          </div>
-        </div>
-        <div>
-          <p className="text-sm text-muted">{t.admin.updatedOn}</p>
-          <div className="mt-1 grid grid-cols-2 gap-3">
-            <label className="block text-sm text-muted">
-              {t.admin.rangeFrom}
-              <input type="date" name="updatedFrom" defaultValue={query.updatedFrom} dir="ltr" className={inputClass} />
-            </label>
-            <label className="block text-sm text-muted">
-              {t.admin.rangeTo}
-              <input type="date" name="updatedTo" defaultValue={query.updatedTo} dir="ltr" className={inputClass} />
-            </label>
-          </div>
-        </div>
-        <label className="block text-sm text-muted">
-          {t.nav.contacts}
-          <select name="contact" defaultValue={query.contactId} className={inputClass}>
-            <option value="">{t.admin.all}</option>
-            {people.map((person) => (
-              <option key={person.id} value={person.id}>
-                {person.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block text-sm text-muted">
-          {t.admin.description}
-          <input name="q" defaultValue={query.q} className={inputClass} />
-        </label>
-        <div className="flex items-center gap-3 md:col-span-2">
-          <button type="submit" className={buttonClass}>
-            {t.admin.filter}
-          </button>
-          {filtering ? (
-            <Link href={meetingListHref(query, { createdFrom: "", createdTo: "", updatedFrom: "", updatedTo: "", contactId: "", q: "" })} className="text-sm text-olive underline">
-              {t.admin.clearFilters}
-            </Link>
-          ) : null}
-        </div>
-      </form>
+      <MeetingFilters query={query} people={people} />
       <div className="overflow-x-auto rounded-lg border border-line bg-card">
         <table className="w-full min-w-[44rem] border-collapse text-sm">
           <thead>

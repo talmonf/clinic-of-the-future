@@ -1,4 +1,4 @@
-import { fromJerusalemInput, one } from "@/lib/format";
+import { fromJerusalemInput, normalizeMeetingDate, one } from "@/lib/format";
 
 export const meetingSorts = ["created", "updated", "subject", "attendees"] as const;
 export type MeetingSort = (typeof meetingSorts)[number];
@@ -27,7 +27,12 @@ export type MeetingListQuery = {
 };
 
 function isoDate(value: string | undefined) {
-  return value && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : "";
+  if (!value) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  const display = normalizeMeetingDate(value);
+  if (!display) return "";
+  const [day, month, year] = display.split("/");
+  return `${year}-${month}-${day}`;
 }
 
 function nextIsoDate(value: string) {
