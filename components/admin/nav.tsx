@@ -11,6 +11,7 @@ const links = [
   ["/admin/assumptions", t.nav.assumptions],
   ["/admin/risks", t.nav.risks],
   ["/admin/meetings", t.nav.meetings],
+  ["/admin/files", t.nav.files],
   ["/admin/appointments", t.nav.appointments],
   ["/admin/contacts", t.nav.contacts],
   ["/admin/tasks", t.nav.tasks],

@@ -10,6 +10,7 @@ Dates in brackets are the day you **applied** the script on Neon. Leave the box 
 
 ## Checklist (mark when run)
 
+- [x] 005_meeting_files.sql
 - [x] 004_meeting_detailed_summary.sql
 - [x] 003_meeting_attendees.sql
 - [x] 002_meeting_recordings.sql
@@ -21,6 +22,7 @@ Dates in brackets are the day you **applied** the script on Neon. Leave the box 
 
 | # | Script | Added | Summary |
 |---|--------|-------|---------|
+| 005 | `005_meeting_files.sql` | 2026-10-29 | Meeting document files in the private S3 bucket: file name, description, object key, content type, and byte size. |
 | 004 | `004_meeting_detailed_summary.sql` | 2026-10-28 | Longer meeting summary, stored separately from the short summary. |
 | 003 | `003_meeting_attendees.sql` | 2026-10-28 | Meeting attendees: a junction to contacts, plus a free-text column for names that are not contacts. |
 | 002 | `002_meeting_recordings.sql` | 2026-10-18 | Meeting transcript text, plus nullable columns for the current private-S3 recording (object key, file name, content type, byte size). |

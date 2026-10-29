@@ -9,11 +9,17 @@ export function FileButton({
   accept,
   required,
   disabled,
+  multiple,
+  label,
+  onFiles,
 }: {
   name: string;
   accept: string;
   required?: boolean;
   disabled?: boolean;
+  multiple?: boolean;
+  label?: string;
+  onFiles?: (files: File[]) => void;
 }) {
   const [fileName, setFileName] = useState("");
   const scrollY = useRef(0);
@@ -22,19 +28,25 @@ export function FileButton({
       <label
         className={`relative inline-flex overflow-hidden ${buttonClass} cursor-pointer ${disabled ? "pointer-events-none opacity-60" : ""}`}
       >
-        {t.admin.chooseFile}
+        {label ?? t.admin.chooseFile}
         <input
           name={name}
           type="file"
           accept={accept}
           required={required}
           disabled={disabled}
+          multiple={multiple}
           className="absolute inset-0 size-full cursor-pointer opacity-0"
           onClick={() => {
             scrollY.current = window.scrollY;
           }}
           onChange={(event) => {
-            setFileName(event.target.files?.[0]?.name ?? "");
+            const selected = Array.from(event.target.files ?? []);
+            if (!multiple) setFileName(selected[0]?.name ?? "");
+            if (onFiles) {
+              onFiles(selected);
+              event.currentTarget.value = "";
+            }
             event.currentTarget.blur();
             const top = scrollY.current;
             window.scrollTo(0, top);
@@ -42,7 +54,7 @@ export function FileButton({
           }}
         />
       </label>
-      {fileName ? <span className="text-sm text-ink">{fileName}</span> : null}
+      {!multiple && fileName ? <span className="text-sm text-ink">{fileName}</span> : null}
     </>
   );
 }

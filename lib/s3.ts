@@ -9,6 +9,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export const MAX_RECORDING_BYTES = 2 * 1024 * 1024 * 1024;
+export const MAX_MEETING_FILE_BYTES = 50 * 1024 * 1024;
 const PUT_EXPIRES_SECONDS = 60 * 60;
 const GET_EXPIRES_SECONDS = 15 * 60;
 
@@ -66,15 +67,41 @@ export function recordingContentType(fileName: string, declared: string) {
   return guessed && isAllowedRecordingType(guessed) ? guessed : null;
 }
 
-function safeFileName(name: string) {
-  const base = name.split(/[/\\]/).pop()?.replace(/[\u0000-\u001f?#]/g, "").trim().slice(0, 160) || "recording";
-  if (base === "." || base === ".." || base.includes("..")) return "recording";
+function safeFileName(name: string, fallback = "recording") {
+  const base = name.split(/[/\\]/).pop()?.replace(/[\u0000-\u001f?#]/g, "").trim().slice(0, 160) || fallback;
+  if (base === "." || base === ".." || base.includes("..")) return fallback;
   return base;
+}
+
+const DOCUMENT_TYPE_ALIASES: Record<string, readonly string[]> = {
+  pdf: ["application/pdf", "application/x-pdf"],
+  doc: ["application/msword", "application/vnd.ms-word", "application/doc"],
+  docx: ["application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+};
+
+export function meetingFileContentType(fileName: string, declared: string) {
+  const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
+  const aliases = DOCUMENT_TYPE_ALIASES[ext];
+  const canonical = aliases?.[0];
+  if (!canonical || !aliases) return null;
+  const raw = declared.split(";")[0]?.trim().toLowerCase() ?? "";
+  if (!raw || raw === "application/octet-stream") return canonical;
+  return aliases.includes(raw) ? canonical : null;
+}
+
+export function meetingFileKeyForMeeting(meetingId: string, key: string) {
+  const prefix = `meetings/${meetingId}/files/`;
+  return key.startsWith(prefix) && !key.includes("..") && key.length <= 500;
+}
+
+export function newMeetingFileKey(meetingId: string, fileName: string) {
+  return `meetings/${meetingId}/files/${randomUUID()}/${safeFileName(fileName, "file")}`;
 }
 
 export function recordingKeyForMeeting(meetingId: string, key: string) {
   const prefix = `meetings/${meetingId}/`;
-  return key.startsWith(prefix) && !key.includes("..") && key.length <= 500;
+  const filesPrefix = `meetings/${meetingId}/files/`;
+  return key.startsWith(prefix) && !key.startsWith(filesPrefix) && !key.includes("..") && key.length <= 500;
 }
 
 export function newRecordingKey(meetingId: string, fileName: string) {

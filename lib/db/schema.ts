@@ -7,6 +7,7 @@ import {
   pgTable,
   text,
   timestamp,
+  index,
   primaryKey,
   unique,
   uuid,
@@ -159,6 +160,23 @@ export const meetingAttendees = pgTable(
       .references(() => contacts.id, { onDelete: "cascade" }),
   },
   (table) => [primaryKey({ columns: [table.meetingId, table.contactId] })],
+);
+
+export const meetingFiles = pgTable(
+  "meeting_files",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    meetingId: uuid("meeting_id")
+      .notNull()
+      .references(() => meetings.id, { onDelete: "cascade" }),
+    description: text("description").notNull().default(""),
+    objectKey: text("object_key").notNull().unique(),
+    fileName: text("file_name").notNull(),
+    contentType: text("content_type").notNull(),
+    byteSize: bigint("byte_size", { mode: "number" }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("meeting_files_meeting_id_idx").on(table.meetingId)],
 );
 
 export const appointments = pgTable("appointments", {
