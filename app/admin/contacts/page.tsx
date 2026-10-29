@@ -10,13 +10,12 @@ import { feedback, type SearchParams } from "@/lib/page";
 import { requireUser } from "@/lib/session";
 
 const columns: { key: ContactSort; label: string }[] = [
-  { key: "created", label: t.admin.createdOn },
-  { key: "updated", label: t.admin.updatedOn },
   { key: "name", label: t.public.name },
   { key: "organization", label: t.admin.organization },
-  { key: "category", label: t.public.category },
+  { key: "category", label: t.admin.contactCategory },
   { key: "status", label: t.admin.status },
-  { key: "source", label: t.admin.source },
+  { key: "created", label: t.admin.createdOn },
+  { key: "updated", label: t.admin.updatedOn },
 ];
 
 function nextDir(column: ContactSort, sort: ContactSort, dir: "asc" | "desc") {
@@ -56,7 +55,7 @@ export default async function ContactsPage({ searchParams }: { searchParams: Sea
       <Flash {...flash} />
       <ContactFilters query={query} />
       <div className="overflow-x-auto rounded-lg border border-line bg-card">
-        <table className="w-full min-w-[64rem] border-collapse text-sm">
+        <table className="w-full min-w-[52rem] border-collapse text-sm">
           <thead>
             <tr className="border-b border-line text-muted">
               {columns.map((column) => {
@@ -81,16 +80,6 @@ export default async function ContactsPage({ searchParams }: { searchParams: Sea
                 <tr key={row.id} className="group border-t border-line">
                   <td>
                     <Link href={href} className="block px-4 py-3 group-hover:bg-paper">
-                      {formatWhen(row.createdAt)}
-                    </Link>
-                  </td>
-                  <td>
-                    <Link href={href} className="block px-4 py-3 group-hover:bg-paper">
-                      {formatWhen(row.updatedAt)}
-                    </Link>
-                  </td>
-                  <td>
-                    <Link href={href} className="block px-4 py-3 group-hover:bg-paper">
                       {row.name}
                     </Link>
                   </td>
@@ -110,8 +99,13 @@ export default async function ContactsPage({ searchParams }: { searchParams: Sea
                     </Link>
                   </td>
                   <td>
-                    <Link href={href} className="block px-4 py-3 text-muted group-hover:bg-paper">
-                      {t.contactSource[row.source]}
+                    <Link href={href} className="block px-4 py-3 group-hover:bg-paper">
+                      {formatWhen(row.createdAt)}
+                    </Link>
+                  </td>
+                  <td>
+                    <Link href={href} className="block px-4 py-3 group-hover:bg-paper">
+                      {formatWhen(row.updatedAt)}
                     </Link>
                   </td>
                 </tr>

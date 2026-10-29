@@ -79,22 +79,8 @@ export function ContactFilters({ query }: { query: ContactListQuery }) {
             <input type="hidden" name="dir" value={query.dir} />
           </>
         ) : null}
-        <div>
-          <p className="text-sm text-muted">{t.admin.createdOn}</p>
-          <div className="mt-1 flex gap-2">
-            <FilterDate name="createdFrom" label={t.admin.rangeFrom} defaultIso={query.createdFrom} attempted={attempted} />
-            <FilterDate name="createdTo" label={t.admin.rangeTo} defaultIso={query.createdTo} attempted={attempted} />
-          </div>
-        </div>
-        <div>
-          <p className="text-sm text-muted">{t.admin.updatedOn}</p>
-          <div className="mt-1 flex gap-2">
-            <FilterDate name="updatedFrom" label={t.admin.rangeFrom} defaultIso={query.updatedFrom} attempted={attempted} />
-            <FilterDate name="updatedTo" label={t.admin.rangeTo} defaultIso={query.updatedTo} attempted={attempted} />
-          </div>
-        </div>
         <label className="block min-w-48 flex-1 text-sm text-muted">
-          {t.public.category}
+          {t.admin.contactCategory}
           <select name="category" defaultValue={query.category} className={inputClass}>
             <option value="">{t.admin.all}</option>
             {contactCategories.map((category) => (
@@ -119,6 +105,20 @@ export function ContactFilters({ query }: { query: ContactListQuery }) {
           {t.public.name}
           <input name="q" defaultValue={query.q} className={inputClass} />
         </label>
+        <div>
+          <p className="text-sm text-muted">{t.admin.createdOn}</p>
+          <div className="mt-1 flex gap-2">
+            <FilterDate name="createdFrom" label={t.admin.rangeFrom} defaultIso={query.createdFrom} attempted={attempted} />
+            <FilterDate name="createdTo" label={t.admin.rangeTo} defaultIso={query.createdTo} attempted={attempted} />
+          </div>
+        </div>
+        <div>
+          <p className="text-sm text-muted">{t.admin.updatedOn}</p>
+          <div className="mt-1 flex gap-2">
+            <FilterDate name="updatedFrom" label={t.admin.rangeFrom} defaultIso={query.updatedFrom} attempted={attempted} />
+            <FilterDate name="updatedTo" label={t.admin.rangeTo} defaultIso={query.updatedTo} attempted={attempted} />
+          </div>
+        </div>
         <div className="flex w-full items-center gap-3">
           <button type="submit" className={buttonClass}>
             {t.admin.filter}

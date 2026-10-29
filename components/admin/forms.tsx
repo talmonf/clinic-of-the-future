@@ -355,7 +355,7 @@ export function ContactForm({
       <Field label={t.admin.organization}>
         <input name="organization" defaultValue={row?.organization ?? ""} className={inputClass} />
       </Field>
-      <Field label={t.public.category}>
+      <Field label={t.admin.contactCategory}>
         <select name="category" defaultValue={row?.category ?? "stakeholder"} className={inputClass}>
           {contactCategories.map((category) => (
             <option key={category} value={category}>

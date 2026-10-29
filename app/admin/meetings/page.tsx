@@ -16,10 +16,10 @@ import { feedback, type SearchParams } from "@/lib/page";
 import { requireUser } from "@/lib/session";
 
 const columns: { key: MeetingSort; label: string }[] = [
-  { key: "created", label: t.admin.createdOn },
-  { key: "updated", label: t.admin.updatedOn },
   { key: "subject", label: t.admin.subject },
   { key: "attendees", label: t.admin.attendees },
+  { key: "created", label: t.admin.createdOn },
+  { key: "updated", label: t.admin.updatedOn },
 ];
 
 function nextDir(column: MeetingSort, sort: MeetingSort, dir: "asc" | "desc") {
@@ -119,22 +119,22 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Sea
                 <tr key={row.id} className="group border-t border-line">
                   <td>
                     <Link href={href} className="block px-4 py-3 group-hover:bg-paper">
-                      {formatWhen(row.createdAt)}
-                    </Link>
-                  </td>
-                  <td>
-                    <Link href={href} className="block px-4 py-3 group-hover:bg-paper">
-                      {formatWhen(row.updatedAt)}
-                    </Link>
-                  </td>
-                  <td>
-                    <Link href={href} className="block px-4 py-3 group-hover:bg-paper">
                       {row.title}
                     </Link>
                   </td>
                   <td>
                     <Link href={href} className="block px-4 py-3 text-muted group-hover:bg-paper">
                       {row.attendees || "—"}
+                    </Link>
+                  </td>
+                  <td>
+                    <Link href={href} className="block px-4 py-3 group-hover:bg-paper">
+                      {formatWhen(row.createdAt)}
+                    </Link>
+                  </td>
+                  <td>
+                    <Link href={href} className="block px-4 py-3 group-hover:bg-paper">
+                      {formatWhen(row.updatedAt)}
                     </Link>
                   </td>
                 </tr>
