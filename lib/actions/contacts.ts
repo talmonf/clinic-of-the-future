@@ -19,7 +19,7 @@ function bail(path: string, error: unknown): never {
 export async function saveContact(formData: FormData) {
   const user = await requireUser();
   const id = optionalId(textValue(formData, "id"));
-  const path = id ? `/admin/contacts/${id}` : "/admin/contacts";
+  const path = id ? `/admin/contacts/${id}` : "/admin/contacts/new";
   const name = textValue(formData, "name");
   const category = textValue(formData, "category");
   const contactStatus = textValue(formData, "contactStatus");

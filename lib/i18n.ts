@@ -226,6 +226,7 @@ export const he = {
     linkedContact: "איש קשר",
     appointmentHelp: "יומן לפגישות הקמה: ייעוץ, ביקור מקום, ספקים. אין כאן קביעת תור למטופלים.",
     organization: "ארגון",
+    source: "מקור",
     contribution: "תרומה אפשרית",
     mutualValue: "ערך הדדי",
     message: "הודעה",
@@ -471,6 +472,7 @@ export const en: typeof he = {
     appointmentHelp:
       "A calendar for setup meetings: advisors, site visits, vendors. There is no patient booking.",
     organization: "Organization",
+    source: "Source",
     contribution: "Possible contribution",
     mutualValue: "Mutual value",
     message: "Message",
